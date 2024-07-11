@@ -1,0 +1,18 @@
+from pythonosc.dispatcher import Dispatcher
+from pythonosc import osc_server
+
+def pose_handler(address, *args):
+    person_id = args[0]
+    coordinates = args[1:]
+    coord_pairs = [(coordinates[i], coordinates[i + 1], coordinates[i + 2]) for i in range(0, len(coordinates), 3)]
+    print(f"Received pose data for person {person_id}: {coord_pairs}")
+
+dispatcher = Dispatcher()
+dispatcher.map("/pose", pose_handler)
+
+ip = "127.0.0.1"
+port = 8000
+
+server = osc_server.BlockingOSCUDPServer((ip, port), dispatcher)
+print(f"Serving on {ip}:{port}")
+server.serve_forever()

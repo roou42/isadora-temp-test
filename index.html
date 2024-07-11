@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Person Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <script>
+        let ws;
+        let people = []; // Array to hold coordinates for each person
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            background(255);
+
+            // Connect to the WebSocket
+            ws = new WebSocket('ws://localhost:8765');
+            ws.onopen = function() {
+                console.log("WebSocket is open now.");
+            };
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                console.log(data); // Log the full data to see the structure
+
+                // Update people data
+                people = data.map(person => ({
+                    x: person.x,
+                    y: person.y,
+                    z: person.z
+                }));
+            };
+            ws.onerror = function(error) {
+                console.log("WebSocket Error:", error);
+            };
+            ws.onclose = function() {
+                console.log("WebSocket is closed now.");
+            };
+        }
+
+        function draw() {
+            background(255); // Clear the background
+
+            // Draw circles for each person detected
+            fill(255, 0, 0); // Red color for the circles
+            noStroke();
+            for (let person of people) {
+                let size = map(abs(person.z), 0, 1000, 10, 50); // Map z to size
+                ellipse(person.x, person.y, size, size); // Draw the circle
+            }
+        }
+    </script>
+</body>
+</html>
